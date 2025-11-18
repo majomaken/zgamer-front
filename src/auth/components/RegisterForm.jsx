@@ -6,7 +6,6 @@ import { useState } from "react";
 export function RegisterForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   let error = { message: 'Test error' };
-  // let error = null;
   let statusMessage = "Test status message";
 
   const initialValues = {

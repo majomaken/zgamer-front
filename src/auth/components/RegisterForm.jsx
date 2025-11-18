@@ -22,7 +22,7 @@ export function RegisterForm() {
           <div className="space-y-4">
             <GamerInput 
               id="username"
-              label="Nombre de usuario"
+              label="Nickname"
               value={values.username}
               onChange={handleChange}
               onBlur={handleBlur}

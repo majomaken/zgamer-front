@@ -1,34 +1,78 @@
-import { Form, Formik } from "formik";
+import { useFormik } from "formik";
 import { GamerInput } from "../../ui/components/GamerInput";
 import { GamerButton } from "../../ui/components/GamerButton";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { z } from "zod";
+import { registerRequest } from "../services/authService";
 
 export function RegisterForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  let error = { message: 'Test error' };
-  let statusMessage = "Test status message";
+  const [error, setError] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
+
+  console.log('isSubmitting', isSubmitting);
+  const schema = useMemo(
+    () =>
+      z.object({
+        name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
+        email: z.email('Introduce un correo válido'),
+        password: z
+          .string()
+          .min(8, 'La contraseña debe tener al menos 8 caracteres')
+          .regex(/[A-Z]/, 'Incluye al menos una letra mayúscula')
+          .regex(/[0-9]/, 'Incluye al menos un número')
+      }), 
+    []
+  )
 
   const initialValues = {
-    username: "",
+    name: "",
     email: "",
     password: "",
   };
 
+  const formik = useFormik({
+    initialValues,
+    // validate,
+    onSubmit: async (values, actions) => {
+      console.log('testOnsubmit', values);
+      try {
+        setStatusMessage(null);
+        setError(null);
+        await registerRequest(values);
+        actions.resetForm();
+        setStatusMessage('Cuenta creada.')
+      } catch (submissionError) {
+        console.error('Registration failed', submissionError);
+        setError(submissionError);
+        setStatusMessage(submissionError.message ?? 'No se pudo registrar, intenta de nuevo');
+      } finally {
+        actions.setSubmitting(false);
+      }
+    },
+  })
+
+  const { values, handleChange, handleBlur, errors, touched } = formik;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('values', values);
+    formik.handleSubmit(values);
+  }
+
   return (
-    <Formik initialValues={initialValues}>
-      {({ values, handleChange, handleBlur, errors, touched, isSubmitting: formSubmitting}) => (
-        <Form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <GamerInput 
-              id="username"
+              id="name"
               label="Nickname"
-              value={values.username}
+              value={values.name}
               onChange={handleChange}
               onBlur={handleBlur}
               placeholder="ShadowSlayer"
-              autoComplete="username"
+              autoComplete="name"
               required
-              error={touched.username && errors.username ? errors.username : undefined}
+              error={touched.name && errors.name ? errors.name : undefined}
             />
             <GamerInput
               id="email"
@@ -66,13 +110,11 @@ export function RegisterForm() {
 
           <GamerButton
             type="submit"
-            disabled={isSubmitting || formSubmitting}
+            disabled={isSubmitting || formik.formSubmitting}
             className="w-full"
           >
             Crear Cuenta
           </GamerButton>
-        </Form>
-      )}
-    </Formik>
+        </form>
   );
 }

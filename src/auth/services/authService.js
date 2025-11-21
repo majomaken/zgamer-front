@@ -14,3 +14,12 @@ export const loginRequest = async (credentials) => {
     throw normalizeError(error);
   }
 }
+
+export const registerRequest = async (payload) => {
+  try {
+    const response = await axios.post(`${API_URL}/auth/register`, payload);
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+}

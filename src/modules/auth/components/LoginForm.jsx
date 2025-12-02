@@ -1,30 +1,27 @@
 import { useState } from "react";
-import { GamerInput } from "../../ui/components/GamerInput";
-import { GamerButton } from "../../ui/components/GamerButton";
-import { loginRequest } from "../services/authService";
+import { GamerInput } from "../../../ui/components/GamerInput";
+import { GamerButton } from "../../../ui/components/GamerButton";
+import { useLogin } from "../hooks/useLogin";
+import { useNavigate } from "react-router-dom";
 
 export function LoginForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const { login, isSubmitting, error, resetError } = useLogin();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      setError(null);
-      setIsSubmitting(true);
-      const response = await loginRequest({ email, password });
-      console.log(response);
-
-      response.status === 'OK' ? setIsLoggedIn(true) : setIsLoggedIn(false);
-
+      resetError();
+      await login({ email, password });
+      setStatusMessage('Inicio de sesión exitoso');
+      setTimeout(() => navigate('/dashboard'), 1000);
+      
     } catch (error) {
-      setError({ message: error.message });
-    } finally {
-      setIsSubmitting(false);
+      setStatusMessage(error);
     }
   }
 
@@ -55,13 +52,13 @@ export function LoginForm() {
 
       {error && (
         <p className="rounded-lg border border-red-500/60 bg-red-950/50 px-4 py-3 text-sm text-red-200">
-          {error.message}
+          {Object.values(error).join(', ')}
         </p>
       )}
 
-      {isLoggedIn && (
+      {statusMessage && !error && (
         <p className="rounded-lg border border-green-500/60 bg-green-950/50 px-4 py-3 text-sm text-green-200">
-          Inicio de sesión exitoso
+          {statusMessage}
         </p>
       )}
 

@@ -1,14 +1,18 @@
-import axios from "axios";
-const API_URL = import.meta.env.VITE_API_URL;
+import httpClient from "./httpClient";
 
 const normalizeError = (error) => {
+  if (error.response?.data?.errors) {
+    return error.response.data.errors;
+  }
+
   const message = error.response?.data?.message ?? error.message ?? 'Error desconocido, por favor intente nuevamente';
+  console.log('error', error);
   return new Error(message);
 }
 
 export const loginRequest = async (credentials) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const response = await httpClient.post('/auth/login', credentials);
     return response.data;
   } catch (error) {
     throw normalizeError(error);
@@ -17,7 +21,7 @@ export const loginRequest = async (credentials) => {
 
 export const registerRequest = async (payload) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/register`, payload);
+    const response = await httpClient.post('/auth/register', payload);
     return response.data;
   } catch (error) {
     throw normalizeError(error);

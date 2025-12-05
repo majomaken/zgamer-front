@@ -1,10 +1,20 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { NAV_LINKS } from "../constants";
+import { AUTH_NAV_LINKS, NAV_LINKS } from "../constants";
 import { GamerButton } from "../ui/components/GamerButton";
 import { useAuth } from "../modules/auth/hooks/useAuth";
 
 export function MainLayout() {
   const { isAuthenticated, logout } = useAuth();
+
+  function resolveNavClass(isActive) {
+    console.log('isActive', isActive);
+    return [
+      'rounded-full px-4 py-2 text-sm font-semibold transition',
+      isActive
+        ? 'bg-fuchsia-600/80 text-white shadow-[0_10px_25px_-10px_rgba(129,61,255,0.75)]'
+        : 'text-slate-300 hover:text-white hover:bg-slate-800/80',
+    ].join(' ')
+  }
 
   return(
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,#120731,#05060f)] text-slate-100">
@@ -16,8 +26,12 @@ export function MainLayout() {
           </div>
           <nav className="flex flex-wrap items-center gap-2">
 
-            {(isAuthenticated ? [] : NAV_LINKS).map((link) => (
-              <NavLink key={link.label} to={link.to}>
+            {(isAuthenticated ? AUTH_NAV_LINKS : NAV_LINKS).map((link) => (
+              <NavLink
+                key={link.label}
+                to={link.to}
+                className={({ isActive }) => resolveNavClass(isActive) }
+              >
                 {link.label}
               </NavLink>
             ))}
@@ -31,11 +45,11 @@ export function MainLayout() {
         </div>
       </header>
 
-      <main>
+      <main className="mx-auto w-full max-w-5xl px-6 py-12">
         <Outlet />
       </main>
 
-      <footer>
+      <footer className="border-t border-white/10 bg-slate-950/40 py-6 text-center text-xs text-slate-500">
         Zona Gamer 2025 - Todos los derechos reservados
       </footer>
     </div>

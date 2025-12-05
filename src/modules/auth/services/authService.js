@@ -1,4 +1,4 @@
-import httpClient from "./httpClient";
+import httpClient from "../../../shared/utils/httpClient";
 
 const normalizeError = (error) => {
   if (error.response?.data?.errors) {

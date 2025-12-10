@@ -19,3 +19,13 @@ export async function getPosts(filters = {}) {
     throw error
   }
 }
+
+export async function deletePost(id) {
+  try {
+    const response = await httpClient.delete(`/posts/${id}`)
+    return response.data
+  } catch (error) {
+    console.error('Error deleting post:', error)
+    throw error
+  }
+}

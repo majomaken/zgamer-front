@@ -1,10 +1,27 @@
 import { GamerButton } from "../../../ui/components/GamerButton";
 import { GamerCard } from "../../../ui/components/GamerCard";
 import { GamerLoader } from "../../../ui/components/GamerLoader";
+import { useAuth } from "../../auth/hooks/useAuth";
+import { useDeletePost } from "../hooks/useDeletePost";
 import { usePosts } from "../hooks/usePosts";
 
 export function PostPublicPage() {
   const { loading, error, posts } = usePosts();
+  const { isAuthenticated } = useAuth();
+  const { isDeleting, deletePost } = useDeletePost();
+
+  const handleDelete = async (postId) => {
+    if (!window.confirm('¿Estás seguro de que quieres eliminar este post?')) {
+      return;
+    }
+
+    try {
+      await deletePost(postId)
+    } catch (error) {
+      console.error('Error al eliminar post:', error)
+      alert('Error al eliminar el post. Intenta nuevamente.')
+    }
+  }
 
   if (loading) {
     return (
@@ -65,10 +82,24 @@ export function PostPublicPage() {
                 <p className="mt-2 text-sm text-slate-400">
                   {post.excerpt}
                 </p>
-                <div className="mt-4">
+                <div className="mt-4 flex flex-wrap gap-2">
                   <GamerButton>
                     Leer más
                   </GamerButton>
+                  {isAuthenticated && (
+                    <>
+                      <GamerButton
+                        type="button"
+                        variant="danger"
+                        disabled={isDeleting}
+                        onClick={() => { handleDelete(post._id) }}
+                        className="bg-red-600/20 text-red-300 hover:bg-red-600/30 disabled:opacity-50"
+                      >
+                        Borrar
+                      </GamerButton>
+                      <></>
+                    </>
+                  )}
                 </div>
               </article>
             ))}

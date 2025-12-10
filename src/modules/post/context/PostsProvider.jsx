@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { getPosts } from "../services/postService";
+import { deletePost, getPosts } from "../services/postService";
 import { PostsContext } from "./PostsContext";
 
 export function PostsProvider({ children }) {
@@ -13,6 +13,7 @@ export function PostsProvider({ children }) {
 
     try {
       const { data } = await getPosts()
+      console.log('data', data)
       setPosts(Array.isArray(data.posts) ? data.posts : [])
     } catch (error) {
       setError(error)
@@ -26,6 +27,21 @@ export function PostsProvider({ children }) {
     return fetchPosts()
   }, [fetchPosts])
 
+  const removePost = useCallback(
+    async (id) => {
+      try{
+        await deletePost(id)
+        setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id))
+        refetch()
+      } catch (err) {
+        setError(err)
+        console.error('Error deleting post:', err)
+        throw err
+      }
+    }
+    ,[refetch]
+  )
+
   useEffect(() => {
     fetchPosts()
   }, [fetchPosts])
@@ -36,7 +52,8 @@ export function PostsProvider({ children }) {
     error,
     refetch,
     fetchPosts,
-  }), [posts, loading, error, refetch, fetchPosts])
+    deletePost: removePost,
+  }), [posts, loading, error, refetch, fetchPosts, removePost])
 
   return (
     <PostsContext.Provider value={value}>

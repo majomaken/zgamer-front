@@ -18,7 +18,7 @@ httpClient.interceptors.request.use((config) => {
 
   const token = window.localStorage.getItem(TOKEN_STORAGE_KEY);
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+    config.headers.Authorization = `Bearer `
   }
 
   return config;
